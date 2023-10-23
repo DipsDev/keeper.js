@@ -16,19 +16,19 @@ const whitelistUsers = ["A", "AB"];
 
 app.post(
   "/auth/keys",
-  keeper.methods.create(async (_req, userId) => {
+  keeper.routes.create(async (_req, userId) => {
     return whitelistUsers.includes(userId);
   })
 );
 app.delete(
   "/auth/keys",
-  keeper.methods.revoke(async (req, key) => {
+  keeper.routes.revoke(async (req, key) => {
     const userId = await keeper.adapter.findByKey(key);
     return userId === req.body?.userId;
   })
 );
 
-app.get("/authorized-api-keys-only", keeper.methods.auth(), (_req, res) => {
+app.get("/authorized-api-keys-only", keeper.routes.protect(), (_req, res) => {
   return res
     .status(200)
     .json({ message: "HII, you got my secret code!", code: "s3cret" });

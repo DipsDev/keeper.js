@@ -10,14 +10,14 @@ interface KeeperConfig {
 
 interface KeeperFunction {
   adapter: Adapter;
-  methods: {
+  routes: {
     create: (
       validator: (req: Request, userId: string) => Promise<boolean>
     ) => RequestHandler;
     revoke: (
       validator: (req: Request, key: string) => Promise<boolean>
     ) => RequestHandler;
-    auth: () => RequestHandler;
+    protect: () => RequestHandler;
   };
 }
 
@@ -28,7 +28,7 @@ export function getApiKey(req: Request) {
 export function Keeper(config: KeeperConfig): KeeperFunction {
   return {
     adapter: config.adapter,
-    methods: {
+    routes: {
       create: (validator) => async (req, res) => {
         const userId = req.body?.userId;
         if (!userId) {
@@ -69,7 +69,7 @@ export function Keeper(config: KeeperConfig): KeeperFunction {
         await config.adapter.revokeKey(key);
         return res.status(200).json({ message: "OK" });
       },
-      auth: () => async (req, res, next) => {
+      protect: () => async (req, res, next) => {
         const apiKey = getApiKey(req);
         if (!apiKey) {
           return res.status(401).json({ message: "Unauthorized" });

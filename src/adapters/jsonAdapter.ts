@@ -3,9 +3,12 @@ import Adapter from "./adapter";
 
 interface JsonAdapterConfig {
   path: string;
+  absolutePath?: boolean;
 }
 export default function JsonAdapter(p: JsonAdapterConfig): Adapter {
-  const db = new JSONdb(`${__dirname.replace("adapters", "")}${p.path}`);
+  const db = new JSONdb(
+    p.absolutePath ? p.path : `${__dirname.replace("adapters", "")}${p.path}`
+  );
 
   return {
     async findByKey(key) {

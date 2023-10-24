@@ -22,7 +22,14 @@ interface KeeperFunction {
 }
 
 export function getApiKey(req: Request) {
-  return req.headers["authorization"]?.split(" ")[1];
+  const auth = req.headers["authorization"]?.split(" ");
+  if (auth?.length !== 2) {
+    return undefined;
+  }
+  if (auth[0] !== "Bearer") {
+    return undefined;
+  }
+  return auth[1];
 }
 
 export function Keeper(config: KeeperConfig): KeeperFunction {
@@ -58,13 +65,13 @@ export function Keeper(config: KeeperConfig): KeeperFunction {
         if (!key) {
           return res
             .status(401)
-            .json({ message: "Unauthorized: `Key` is undefined" });
+            .json({ message: "Unauthorized: `Key` was not provided." });
         }
         if (!(await validator(req, key))) {
           console.error("Unauthorized: `Validator` method was rejected");
-          return res
-            .status(401)
-            .json({ message: "Unauthorized: `Validator` method was rejected" });
+          return res.status(401).json({
+            message: "Unauthorized: `Validator` method was rejected.",
+          });
         }
         await config.adapter.revokeKey(key);
         return res.status(200).json({ message: "OK" });

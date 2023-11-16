@@ -61,7 +61,7 @@ export function Keeper(config: KeeperConfig): KeeperFunction {
         await config.adapter
           .createKey(hashedKey, userId)
           .then(() => {
-            res.status(201).json({ message: "OK", key: hashedKey });
+            res.status(201).json({ message: "OK", key });
           })
           .catch((error: string) => {
             res.status(500).json({ message: "Error Occured", error });
@@ -80,7 +80,7 @@ export function Keeper(config: KeeperConfig): KeeperFunction {
             message: "Unauthorized: `Validator` method was rejected.",
           });
         }
-        await config.adapter.revokeKey(key);
+        await config.adapter.revokeKey(SHA256(key));
         return res.status(200).json({ message: "OK" });
       },
       protect: () => async (req, res, next) => {

@@ -8,6 +8,10 @@ interface KeeperConfig {
   overrideKeyGeneration?: () => string;
 }
 
+function SHA256(string: string) {
+  return crypto.createHash("sha256").update(string).digest("hex");
+}
+
 interface KeeperFunction {
   adapter: Adapter;
   routes: {
@@ -51,10 +55,13 @@ export function Keeper(config: KeeperConfig): KeeperFunction {
         const key = config.overrideKeyGeneration
           ? config.overrideKeyGeneration()
           : crypto.randomUUID();
+
+        const hashedKey = SHA256(key);
+
         await config.adapter
-          .createKey(key, userId)
+          .createKey(hashedKey, userId)
           .then(() => {
-            res.status(201).json({ message: "OK", key });
+            res.status(201).json({ message: "OK", key: hashedKey });
           })
           .catch((error: string) => {
             res.status(500).json({ message: "Error Occured", error });
@@ -67,7 +74,7 @@ export function Keeper(config: KeeperConfig): KeeperFunction {
             .status(401)
             .json({ message: "Unauthorized: `Key` was not provided." });
         }
-        if (!(await validator(req, key))) {
+        if (!(await validator(req, SHA256(key)))) {
           console.error("Unauthorized: `Validator` method was rejected");
           return res.status(401).json({
             message: "Unauthorized: `Validator` method was rejected.",
@@ -81,7 +88,7 @@ export function Keeper(config: KeeperConfig): KeeperFunction {
         if (!apiKey) {
           return res.status(401).json({ message: "Unauthorized" });
         }
-        const isValid = await config.adapter.checkKey(apiKey);
+        const isValid = await config.adapter.checkKey(SHA256(apiKey));
         if (!isValid) {
           return res.status(401).json({ message: "Unauthorized" });
         }

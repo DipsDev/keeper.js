@@ -3,7 +3,6 @@ import bodyParser from "body-parser";
 
 import { Keeper } from "..";
 import MemoryAdapter from "../adapters/memoryAdapter";
-import Adapter from "../adapters/adapter";
 export const app = express();
 
 app.use(bodyParser.json());

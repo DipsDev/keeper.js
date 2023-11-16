@@ -1,6 +1,5 @@
 import request from "supertest";
-import { adapter, app } from "./app";
-import JsonAdapter from "../adapters/jsonAdapter";
+import { app } from "./app";
 
 describe("Create Key", () => {
   test("should create your key and return it", async () => {
